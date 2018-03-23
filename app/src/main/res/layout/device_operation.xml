@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp">
+    <RelativeLayout
+        android:id="@+id/operation_rl"
+        android:layout_width="match_parent"
+        android:layout_height="30dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/device_name_tv"
+            android:text="device name"
+            android:textSize="20dp"
+            android:textColor="@android:color/black"/>
+        <ImageView
+            android:id="@+id/expand_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/operations_expand_selector"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
+    <LinearLayout
+        android:id="@+id/operations_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/op_open_flash"
+            android:textColor="@android:color/holo_blue_dark"
+            android:text="打开手电筒"
+            android:textSize="30dp"
+            android:background="@color/grey"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/op_close_flash"
+            android:textColor="@android:color/holo_blue_dark"
+            android:text="关闭手电筒"
+            android:textSize="30dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/op_music"
+            android:textColor="@android:color/holo_blue_dark"
+            android:text="播放音乐"
+            android:textSize="30dp"
+            android:background="@color/grey"/>
+        <RelativeLayout
+            android:id="@+id/op_say"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_say"
+                android:textColor="@android:color/holo_blue_dark"
+                android:text="大声说"
+                android:textSize="30dp" />
+            <EditText
+                android:layout_toRightOf="@+id/tv_say"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:focusedByDefault="false"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

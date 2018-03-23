@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_nav_bar_home"
+        android:enabled="true"
+        android:checked="true"
+        android:icon="@mipmap/bottom_navigation_icon_home_page"
+        android:title="@string/nav_icon_home" />
+    <item
+        android:id="@+id/action_nav_bar_settings"
+        android:enabled="true"
+        android:checked="true"
+        android:icon="@mipmap/bottom_navigation_icon_settings"
+        android:title="@string/nav_icon_settings" />
+    <item
+        android:id="@+id/action_nav_bar_test"
+        android:enabled="true"
+        android:checked="false"
+        android:icon="@mipmap/bottom_navigation_icon_test"
+        android:title="@string/nav_icon_test" />
+</menu>

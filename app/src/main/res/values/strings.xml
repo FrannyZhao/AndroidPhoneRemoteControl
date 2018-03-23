@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">MqttLib</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_connecting">Connecting...</string>
+    <string name="status_connect_fail">Connect fail</string>
+    <string name="status_published">Message "%s" published</string>
+    <string name="status_subscribe">Topic %s subscribed</string>
+
+    <string name="btn_txt_connect">Connect</string>
+    <string name="btn_txt_publish">Publish</string>
+    <string name="btn_txt_subscribe">Subscribe</string>
+    <string name="btn_txt_disconnect">Disconnect</string>
+    <string name="btn_txt_save">Save</string>
+
+    <string name="default_server">  tcp://test.mosquitto.org  </string>
+    <string name="default_port">  1883  </string>
+    <string name="default_topic">  hellochocho  </string>
+    <string name="default_msg">  hello from franny  </string>
+    <string name="default_user_name">Franny\'s Nexus6P</string>
+
+    <string name="txt_server">Server: </string>
+    <string name="txt_port">Port:   </string>
+    <string name="txt_topic">Topic: </string>
+    <string name="txt_msg">Message:</string>
+    <string name="txt_status">Status:</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="nav_icon_home">Home</string>
+    <string name="nav_icon_settings">Settings</string>
+    <string name="nav_icon_test">Test</string>
+
+    <string name="unique_name_toast">Please give me an unique name</string>
+    <string name="first_time_connect">Hello everybody, this is %s online.</string>
+    <string name="ping_other_device">Welcome, I am %s.</string>
+
+    <string name="online_devices_title">Online devices:</string>
+</resources>
