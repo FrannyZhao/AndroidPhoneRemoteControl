@@ -5,12 +5,14 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.net.Uri;
+import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.frannyzhao.mqttlib.BusEvent;
 import com.frannyzhao.mqttlib.MqttEventBusConfig;
 import com.frannyzhao.mqttlib.MqttHandler;
+import com.frannyzhao.mqttlib.ui.HomeFragment;
 import com.frannyzhao.mqttlib.utils.sp.MQTTSharePreference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -31,6 +33,7 @@ public class MessageHandler {
     public static final String KEY_RESULT = "action_result";
     public static final String RESULT_SUCCESS = "success";
     public static final String RESULT_FAIL = "fail";
+    public static final String KEY_WORDS = "words";
 
     public static final int ACTION_RESULT = 99;
     public static final int ACTION_FIRST_ONLINE = 100;
@@ -38,7 +41,7 @@ public class MessageHandler {
     public static final int ACTION_DISCONNECT = 102;
     public static final int ACTION_OPEN_FLASH = 103;
     public static final int ACTION_CLOSE_FLASH = 104;
-
+    public static final int ACTION_SAY_LOUDLY = 105;
 
     private static Camera mCamera = null;
     private static Camera.Parameters mCameraParameters;
@@ -137,6 +140,16 @@ public class MessageHandler {
                         MLog.d(TAG, ex);
                         sendActionResult(activity, action, RESULT_FAIL, fromDeviceName);
                     }
+                }
+                break;
+            case ACTION_SAY_LOUDLY:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                String words = uri.getQueryParameter(KEY_WORDS);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName) && !TextUtils.isEmpty(words)) {
+                    VolumeHandler.turnVolumeUpToMax(activity);
+                    HomeFragment.getSpeaker().speak(words, TextToSpeech.QUEUE_ADD, null);
+//                    VolumeHandler.restoreVolume(); todo 希望能检测到说完了之后把音量改回来
+                    sendActionResult(activity, action, RESULT_SUCCESS, fromDeviceName);
                 }
                 break;
             default:

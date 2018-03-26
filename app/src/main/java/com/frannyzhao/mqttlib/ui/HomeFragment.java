@@ -7,6 +7,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -32,7 +33,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.HashMap;
+import java.util.Locale;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = HomeFragment.class.getSimpleName();
@@ -45,6 +46,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private TransitionDrawable mStatusTransition;
     private LinearLayout mDevicePanel;
 
+    private static TextToSpeech mTts;
     private static final int CAMERA_REQUEST_CODE = 1;
 
     public HomeFragment() {
@@ -74,6 +76,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA},
                     CAMERA_REQUEST_CODE);
         }
+        enableTTS();
     }
 
     @Override
@@ -84,10 +87,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the contacts-related task you need to do.
-                    // 支持相机功能
+                    // TODO 支持相机功能
                 } else {
                     // permission denied, boo! Disable the functionality that depends on this permission.
-                    // 不支持相机功能
+                    // todo 不支持相机功能
                 }
                 break;
             default:
@@ -95,10 +98,51 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    public static TextToSpeech getSpeaker() {
+        return mTts;
+    }
+
+    private void enableTTS() {
+        if(mTts != null) {
+            mTts.stop();
+            mTts.shutdown();
+            MLog.d(TAG, "TTS Destroyed");
+        }
+        final Locale defaultLocal = Locale.getDefault();
+        MLog.d(TAG, "defaultLocal = " + defaultLocal);
+        mTts = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                MLog.d(TAG, "onInit status = " + status);
+                if (status == TextToSpeech.SUCCESS) {
+                    if (null != mTts) {
+                        mTts.setSpeechRate(0.5f);
+                        MLog.d(TAG, "mTts.isLanguageAvailable = " + mTts.isLanguageAvailable(defaultLocal));
+                        if (mTts.isLanguageAvailable(defaultLocal) >= 0) {
+                            mTts.setLanguage(defaultLocal);
+                        } else if (mTts.isLanguageAvailable(Locale.ENGLISH) >= 0) {
+                            mTts.setLanguage(Locale.ENGLISH);
+                        } else {
+                            // todo 不支持语音功能
+                        }
+                    } else {
+                        MLog.e(TAG, "Cann't create TextToSpeech object");
+                        // todo 不支持语音功能
+                    }
+                }
+            }
+        });
+    }
+
     @Override
     public void onDestroy() {
         MLog.d(TAG, "onDestroy");
         EventBus.getDefault().unregister(this);
+        if(mTts != null) {
+            mTts.stop();
+            mTts.shutdown();
+            MLog.d(TAG, "TTS Destroyed");
+        }
         super.onDestroy();
     }
 

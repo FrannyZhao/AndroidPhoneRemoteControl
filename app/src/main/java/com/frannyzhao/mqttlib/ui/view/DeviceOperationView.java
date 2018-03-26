@@ -1,8 +1,10 @@
 package com.frannyzhao.mqttlib.ui.view;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,6 +32,7 @@ public class DeviceOperationView extends FrameLayout implements View.OnClickList
     private ImageView mExpandIv;
     private TextView mOperationOpenFlash, mOperationCloseFlash, mOperationMusic;
     private RelativeLayout mOperationSay;
+    private EditText mSayWords;
     public DeviceOperationView(Context context) {
         this(context, null);
     }
@@ -60,6 +63,7 @@ public class DeviceOperationView extends FrameLayout implements View.OnClickList
         mOperationMusic.setOnClickListener(this);
         mOperationSay = findViewById(R.id.op_say);
         mOperationSay.setOnClickListener(this);
+        mSayWords = findViewById(R.id.et_say);
     }
 
     public void setDeviceName(String name) {
@@ -97,6 +101,16 @@ public class DeviceOperationView extends FrameLayout implements View.OnClickList
             String msg = MessageHandler.generateMessage(mContext, MessageHandler.ACTION_CLOSE_FLASH,
                     mHashMap);
             MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
+        } else if (id == R.id.op_say) {
+            String words = mSayWords.getText().toString();
+            if (!TextUtils.isEmpty(words)) {
+                mHashMap.clear();
+                mHashMap.put(MessageHandler.KEY_TARGET_DEVICE, getDeviceName());
+                mHashMap.put(MessageHandler.KEY_WORDS, words);
+                String msg = MessageHandler.generateMessage(mContext, MessageHandler.ACTION_SAY_LOUDLY,
+                        mHashMap);
+                MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
+            }
         }
     }
 }

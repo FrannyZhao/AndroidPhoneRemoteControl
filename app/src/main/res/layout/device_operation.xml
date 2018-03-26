@@ -65,6 +65,7 @@
                 android:text="大声说"
                 android:textSize="30dp" />
             <EditText
+                android:id="@+id/et_say"
                 android:layout_toRightOf="@+id/tv_say"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
