@@ -30,7 +30,8 @@ public class DeviceOperationView extends FrameLayout implements View.OnClickList
     private LinearLayout mOperationLl;
     private TextView mDeviceNameTv;
     private ImageView mExpandIv;
-    private TextView mOperationOpenFlash, mOperationCloseFlash, mOperationMusic;
+    private TextView mOperationOpenFlash, mOperationCloseFlash,
+            mOperationOpenMusic, mOperationCloseMusic, mOperationVolumeMax, mOperationVolumeMin;
     private RelativeLayout mOperationSay;
     private EditText mSayWords;
     public DeviceOperationView(Context context) {
@@ -59,11 +60,17 @@ public class DeviceOperationView extends FrameLayout implements View.OnClickList
         mOperationOpenFlash.setOnClickListener(this);
         mOperationCloseFlash = findViewById(R.id.op_close_flash);
         mOperationCloseFlash.setOnClickListener(this);
-        mOperationMusic = findViewById(R.id.op_music);
-        mOperationMusic.setOnClickListener(this);
+        mOperationOpenMusic = findViewById(R.id.op_open_music);
+        mOperationOpenMusic.setOnClickListener(this);
+        mOperationCloseMusic = findViewById(R.id.op_close_music);
+        mOperationCloseMusic.setOnClickListener(this);
         mOperationSay = findViewById(R.id.op_say);
         mOperationSay.setOnClickListener(this);
         mSayWords = findViewById(R.id.et_say);
+        mOperationVolumeMax = findViewById(R.id.op_volume_max);
+        mOperationVolumeMax.setOnClickListener(this);
+        mOperationVolumeMin = findViewById(R.id.op_volume_min);
+        mOperationVolumeMin.setOnClickListener(this);
     }
 
     public void setDeviceName(String name) {
@@ -111,6 +118,30 @@ public class DeviceOperationView extends FrameLayout implements View.OnClickList
                         mHashMap);
                 MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
             }
+        } else if (id == R.id.op_open_music) {
+            mHashMap.clear();
+            mHashMap.put(MessageHandler.KEY_TARGET_DEVICE, getDeviceName());
+            String msg = MessageHandler.generateMessage(mContext, MessageHandler.ACTION_OPEN_DOUBAN_FM,
+                    mHashMap);
+            MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
+        } else if (id == R.id.op_close_music) {
+            mHashMap.clear();
+            mHashMap.put(MessageHandler.KEY_TARGET_DEVICE, getDeviceName());
+            String msg = MessageHandler.generateMessage(mContext, MessageHandler.ACTION_CLOSE_MUSIC,
+                    mHashMap);
+            MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
+        } else if (id == R.id.op_volume_max) {
+            mHashMap.clear();
+            mHashMap.put(MessageHandler.KEY_TARGET_DEVICE, getDeviceName());
+            String msg = MessageHandler.generateMessage(mContext, MessageHandler.ACTION_VOLUME_MAX,
+                    mHashMap);
+            MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
+        } else if (id == R.id.op_volume_min) {
+            mHashMap.clear();
+            mHashMap.put(MessageHandler.KEY_TARGET_DEVICE, getDeviceName());
+            String msg = MessageHandler.generateMessage(mContext, MessageHandler.ACTION_VOLUME_MIN,
+                    mHashMap);
+            MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
         }
     }
 }

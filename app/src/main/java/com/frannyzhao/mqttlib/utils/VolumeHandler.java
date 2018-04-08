@@ -26,6 +26,18 @@ public class VolumeHandler {
         }
     }
 
+    public static void turnVolumeDownToMin(Context context) {
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        // 保存原先的音量值
+        MUSIC_VOLUME = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+        if (am.isWiredHeadsetOn() || am.isBluetoothA2dpOn()) {
+            needRestoreVolume = false;
+        } else {
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, 0, AudioManager.FLAG_PLAY_SOUND);
+            needRestoreVolume = true;
+        }
+    }
+
     public void restoreVolume(Context context) {
         AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         // 音量恢复到原本的值

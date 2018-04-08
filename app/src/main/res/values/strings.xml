@@ -37,4 +37,8 @@
     <string name="ping_other_device">Welcome, I am %s.</string>
 
     <string name="online_devices_title">Online devices:</string>
+    <!-- todo -->
+    <string name="accessibility_service_description">开启辅助功能, 可以实现.
+        \n打开右上角开关,在弹出的对话框中点击"确定".\n开启时,您会收到关于隐私风险的例行提示,本应用开发者承诺不会通过本服务收集任何用户信息,请您放心使用.</string>
+    <string name="acc_service_name">安卓手机远程控制</string>
 </resources>

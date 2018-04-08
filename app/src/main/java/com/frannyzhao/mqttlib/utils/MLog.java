@@ -1,5 +1,6 @@
 package com.frannyzhao.mqttlib.utils;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -63,5 +64,33 @@ public class MLog {
             return sb.toString();
         }
         return "";
+    }
+
+    public static void printStackTrace(Exception e) {
+        if (e != null && e.getMessage() != null) {
+            d(defaultTag, e.getMessage());
+        }
+    }
+
+    public static void printStackTrace(String customTag,Exception e){
+        if (e != null && e.getMessage() != null) {
+            if(!TextUtils.isEmpty(customTag)){
+                d(customTag, e.getMessage());
+            }else{
+                d(defaultTag, e.getMessage());
+            }
+        }
+    }
+
+    public static void printStackTrace(Error e) {
+        if (e != null && e.getMessage() != null) {
+            d(defaultTag, e.getMessage());
+        }
+    }
+
+    public static void printStackTrace(Throwable e){
+        if (e != null && e.getMessage() != null) {
+            d(defaultTag, e.getMessage());
+        }
     }
 }

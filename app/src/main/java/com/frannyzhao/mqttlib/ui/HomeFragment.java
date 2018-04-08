@@ -33,6 +33,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.util.Locale;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
@@ -137,6 +138,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroy() {
         MLog.d(TAG, "onDestroy");
+        if (mIsConnected) {
+            String msg = MessageHandler.generateMessage(getActivity(),
+                    MessageHandler.ACTION_DISCONNECT, null);
+            mMqttHandler.publish(MQTTSharePreference.getTopic(getActivity()), msg);
+            mMqttHandler.disconnect();
+        }
         EventBus.getDefault().unregister(this);
         if(mTts != null) {
             mTts.stop();
@@ -162,7 +169,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         mConnectTv.setOnClickListener(this);
         mStatusTransition = (TransitionDrawable) mConnectTv.getBackground();
         mDevicePanel = rootView.findViewById(R.id.device_panel);
-        
         return rootView;
     }
 

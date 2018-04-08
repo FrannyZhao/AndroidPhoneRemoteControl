@@ -1,15 +1,21 @@
 package com.frannyzhao.mqttlib.ui;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.frannyzhao.mqttlib.MyAccessibilityService;
 import com.frannyzhao.mqttlib.R;
+import com.frannyzhao.mqttlib.utils.MLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
+        openAccessibility(MyAccessibilityService.class.getName(), this);
     }
 
     @Override
@@ -77,9 +84,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    /**
+     * 该辅助功能开关是否打开了
+     * @param accessibilityServiceName：指定辅助服务名字
+     */
+    private boolean isAccessibilitySettingsOn(String accessibilityServiceName, Context context) {
+        int accessibilityEnable = 0;
+        String serviceName = context.getPackageName() + "/" +accessibilityServiceName;
+        try {
+            accessibilityEnable = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED, 0);
+        } catch (Exception e) {
+            MLog.e(TAG, "get accessibility enable failed, the err:" + e.getMessage());
+        }
+        if (accessibilityEnable == 1) {
+            TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
+            String settingValue = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            if (settingValue != null) {
+                mStringColonSplitter.setString(settingValue);
+                while (mStringColonSplitter.hasNext()) {
+                    String accessibilityService = mStringColonSplitter.next();
+                    MLog.d(TAG, "accessibilityService ", accessibilityService);
+                    if (accessibilityService.equalsIgnoreCase(serviceName)) {
+                        MLog.v(TAG, "Found the correct setting - ", serviceName, " accessibility is switched on!");
+                        return true;
+                    }
+                }
+            }
+        } else {
+            MLog.d(TAG,"Accessibility service ", serviceName, " disable");
+        }
+        return false;
+    }
 
-
-
-
+    /**
+     * 跳转到系统设置页面开启辅助功能
+     * @param accessibilityServiceName：指定辅助服务名字
+     */
+    private void openAccessibility(String accessibilityServiceName, Context context) {
+        if (!isAccessibilitySettingsOn(accessibilityServiceName, context)) {
+            // todo 提醒要打开辅助功能
+            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+    }
 
 }

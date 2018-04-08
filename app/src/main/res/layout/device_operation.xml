@@ -48,15 +48,23 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/op_music"
+            android:id="@+id/op_open_music"
             android:textColor="@android:color/holo_blue_dark"
-            android:text="播放音乐"
+            android:text="打开豆瓣FM"
             android:textSize="30dp"
             android:background="@color/grey"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/op_close_music"
+            android:textColor="@android:color/holo_blue_dark"
+            android:text="关闭豆瓣FM"
+            android:textSize="30dp"/>
         <RelativeLayout
             android:id="@+id/op_say"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:background="@color/grey">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -72,7 +80,21 @@
                 android:layout_marginLeft="20dp"
                 android:focusedByDefault="false"/>
         </RelativeLayout>
-
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/op_volume_max"
+            android:textColor="@android:color/holo_blue_dark"
+            android:text="音量最大"
+            android:textSize="30dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/op_volume_min"
+            android:textColor="@android:color/holo_blue_dark"
+            android:text="音量最小"
+            android:textSize="30dp"
+            android:background="@color/grey"/>
     </LinearLayout>
 
 </LinearLayout>

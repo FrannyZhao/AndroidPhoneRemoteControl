@@ -1,9 +1,12 @@
 package com.frannyzhao.mqttlib.utils;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
@@ -12,6 +15,8 @@ import android.widget.Toast;
 import com.frannyzhao.mqttlib.BusEvent;
 import com.frannyzhao.mqttlib.MqttEventBusConfig;
 import com.frannyzhao.mqttlib.MqttHandler;
+import com.frannyzhao.mqttlib.MyAccessibilityService;
+import com.frannyzhao.mqttlib.entity.MyAccessibilityEvent;
 import com.frannyzhao.mqttlib.ui.HomeFragment;
 import com.frannyzhao.mqttlib.utils.sp.MQTTSharePreference;
 
@@ -42,6 +47,10 @@ public class MessageHandler {
     public static final int ACTION_OPEN_FLASH = 103;
     public static final int ACTION_CLOSE_FLASH = 104;
     public static final int ACTION_SAY_LOUDLY = 105;
+    public static final int ACTION_OPEN_DOUBAN_FM = 106;
+    public static final int ACTION_CLOSE_MUSIC = 107;
+    public static final int ACTION_VOLUME_MAX = 108;
+    public static final int ACTION_VOLUME_MIN = 109;
 
     private static Camera mCamera = null;
     private static Camera.Parameters mCameraParameters;
@@ -62,7 +71,7 @@ public class MessageHandler {
         return msg.toString();
     }
 
-    public static void parseMessage(Activity activity, String msg) {
+    public static void parseMessage(final Activity activity, String msg) {
         if (TextUtils.isEmpty(msg)) {
             return;
         }
@@ -72,6 +81,7 @@ public class MessageHandler {
         int action = NumberUtils.parseInt(uri.getQueryParameter(ACTION));
         String fromDeviceName = uri.getQueryParameter(KEY_FROM_DEVICE);
         String targetDeviceName = "";
+        final AudioManager am = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
         switch (action) {
             case ACTION_RESULT:
                 String actionName = uri.getQueryParameter(KEY_ACTION);
@@ -152,18 +162,63 @@ public class MessageHandler {
                     sendActionResult(activity, action, RESULT_SUCCESS, fromDeviceName);
                 }
                 break;
+            case ACTION_OPEN_DOUBAN_FM:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MyAccessibilityService.MyAccessibility_EVENT =
+                            new MyAccessibilityEvent(MyAccessibilityEvent.TYPE_DOUBAN_FM, fromDeviceName);
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    ComponentName cn = new ComponentName("com.douban.radio",
+                            "com.douban.radio.ui.WelcomeActivity");
+                    intent.setComponent(cn);
+                    activity.startActivity(intent);
+                }
+                break;
+            case ACTION_CLOSE_MUSIC:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    if (am != null) {
+                        // Request audio focus for playback focusChangeListener
+                        int result = am.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
+                                AudioManager.AUDIOFOCUS_GAIN);
+                        MLog.d(TAG, "am.requestAudioFocus result ", result);
+                        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                            // other app had stopped playing song now , so u can do u stuff now .
+                            sendActionResult(activity, action, RESULT_SUCCESS, fromDeviceName);
+                        } else {
+                            sendActionResult(activity, action, RESULT_FAIL, fromDeviceName);
+                        }
+                    }
+                }
+                break;
+            case ACTION_VOLUME_MAX:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    VolumeHandler.turnVolumeUpToMax(activity);
+                    sendActionResult(activity, action, RESULT_SUCCESS, fromDeviceName);
+                }
+                break;
+            case ACTION_VOLUME_MIN:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    VolumeHandler.turnVolumeDownToMin(activity);
+                    sendActionResult(activity, action, RESULT_SUCCESS, fromDeviceName);
+                }
+                break;
             default:
                 break;
         }
     }
 
-    private static void sendActionResult(Activity activity, int action, String result, String targetDevice) {
+    public static void sendActionResult(Context context, int action, String result, String targetDevice) {
         HashMap<String, String> hashMap = new HashMap<>();
         hashMap.put(KEY_TARGET_DEVICE, targetDevice);
         hashMap.put(KEY_ACTION, String.valueOf(action));
         hashMap.put(KEY_RESULT, result);
-        String resultMsg = MessageHandler.generateMessage(activity, MessageHandler.ACTION_RESULT,
+        String resultMsg = MessageHandler.generateMessage(context, MessageHandler.ACTION_RESULT,
                 hashMap);
-        MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(activity), resultMsg);
+        MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(context), resultMsg);
     }
 }
