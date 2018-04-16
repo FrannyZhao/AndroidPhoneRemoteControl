@@ -39,8 +39,8 @@ public class MqttHandler implements MqttInterface, MqttCallback {
     }
 
     @Override
-    public MqttClient connect(Activity activity, String broker, String userName, String password) {
-        String clientId = MQTTSharePreference.getDeviceName(activity);
+    public MqttClient connect(Context context, String broker, String userName, String password) {
+        String clientId = MQTTSharePreference.getDeviceName(context);
         MemoryPersistence persistence = new MemoryPersistence();
         try {
             mqttClient = new MqttClient(broker, clientId, persistence);

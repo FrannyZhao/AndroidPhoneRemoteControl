@@ -40,6 +40,8 @@ public class MessageHandler {
     public static final String RESULT_FAIL = "fail";
     public static final String KEY_WORDS = "words";
 
+    public static final int ACTION_PING = 88;
+    public static final int ACTION_PINGBACK = 89;
     public static final int ACTION_RESULT = 99;
     public static final int ACTION_FIRST_ONLINE = 100;
     public static final int ACTION_NOTIFY_NAME = 101;
@@ -83,6 +85,26 @@ public class MessageHandler {
         String targetDeviceName = "";
         final AudioManager am = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
         switch (action) {
+            case ACTION_PING:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    BusEvent deviceConnectedEvent = new BusEvent(MqttEventBusConfig.deviceConnected, fromDeviceName);
+                    EventBus.getDefault().post(deviceConnectedEvent);
+                    HashMap<String, String> hashMap = new HashMap<>();
+                    hashMap.put(KEY_TARGET_DEVICE, fromDeviceName);
+                    String pingbackMsg = MessageHandler.generateMessage(activity,
+                            MessageHandler.ACTION_PINGBACK,
+                            hashMap);
+                    MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(activity), pingbackMsg);
+                }
+                break;
+            case ACTION_PINGBACK:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    BusEvent deviceConnectedEvent = new BusEvent(MqttEventBusConfig.deviceConnected, fromDeviceName);
+                    EventBus.getDefault().post(deviceConnectedEvent);
+                }
+                break;
             case ACTION_RESULT:
                 String actionName = uri.getQueryParameter(KEY_ACTION);
                 String actionResult = uri.getQueryParameter(KEY_RESULT);

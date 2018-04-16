@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.frannyzhao.mqttlib.HeartbeatService;
 import com.frannyzhao.mqttlib.MyAccessibilityService;
 import com.frannyzhao.mqttlib.R;
 import com.frannyzhao.mqttlib.utils.MLog;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = MainActivity.class.getSimpleName();
     private List<Fragment> fragments = new ArrayList<>();
     private NoScrollViewPager mViewPager;
+    private Intent mHeartbeatServiceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +67,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         return true;
                     }
                 });
+        mHeartbeatServiceIntent = new Intent();
+        mHeartbeatServiceIntent.setClass(this, HeartbeatService.class);
+        startService(mHeartbeatServiceIntent);
     }
 
     @Override
@@ -75,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onDestroy() {
+        MLog.d(TAG, "onDestroy");
+        stopService(mHeartbeatServiceIntent);
         super.onDestroy();
     }
 

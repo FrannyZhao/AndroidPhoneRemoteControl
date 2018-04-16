@@ -23,6 +23,7 @@ import com.frannyzhao.mqttlib.BusEvent;
 import com.frannyzhao.mqttlib.MqttEventBusConfig;
 import com.frannyzhao.mqttlib.MqttHandler;
 import com.frannyzhao.mqttlib.R;
+import com.frannyzhao.mqttlib.jobqueue.JobManager;
 import com.frannyzhao.mqttlib.ui.view.DeviceOperationView;
 import com.frannyzhao.mqttlib.utils.MLog;
 import com.frannyzhao.mqttlib.utils.MessageHandler;
@@ -38,11 +39,10 @@ import java.util.Locale;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = HomeFragment.class.getSimpleName();
-    private boolean mIsConnected = false;
+    private static boolean mIsConnected = false;
     private boolean mShouldRunAnimation = false;
     private int mAnimationDuration = 300;
     private MqttHandler mMqttHandler;
-    private MqttClient mMqttClient;
     private TextView mConnectTv;
     private TransitionDrawable mStatusTransition;
     private LinearLayout mDevicePanel;
@@ -171,7 +171,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         mDevicePanel = rootView.findViewById(R.id.device_panel);
         return rootView;
     }
-
+/*
     private void repeatAnimation() {
         mStatusTransition.startTransition(mAnimationDuration);
         new CountDownTimer(mAnimationDuration, mAnimationDuration / 2) {
@@ -183,11 +183,30 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //                MLog.d(TAG, "onFinish mIsConnected " + mIsConnected);
                 if (mShouldRunAnimation) {
                     mStatusTransition.resetTransition();
-                    mShouldRunAnimation = true;
                     repeatAnimation();
                 }
             }
         }.start();
+    }
+*/
+    private void repeatAnimation() {
+        JobManager.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while (mShouldRunAnimation) {
+                        mStatusTransition.startTransition(mAnimationDuration);
+                        Thread.sleep(mAnimationDuration);
+                        if (mShouldRunAnimation) {
+                            mStatusTransition.resetTransition();
+                        }
+                    }
+                } catch (Exception e) {
+
+                }
+
+            }
+        });
     }
 
     @Override
@@ -211,8 +230,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             } else {
                 if (!mIsConnected) {
                     mShouldRunAnimation = true;
+//                    JobManager.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            repeatAnimation();
+//                        }
+//                    });
                     repeatAnimation();
-                    mMqttClient = mMqttHandler.connect(getActivity(),
+                    mMqttHandler.connect(getActivity(),
                             MQTTSharePreference.getServer(getActivity()) + ":" + MQTTSharePreference.getPort(getActivity()),
                             MQTTSharePreference.getLoginName(getActivity()), MQTTSharePreference.getPassword(getActivity()));
                 } else {
@@ -265,13 +290,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 DeviceOperationView deviceOperationView = new DeviceOperationView(getActivity());
                 deviceOperationView.setDeviceName(deviceName);
                 mDevicePanel.addView(deviceOperationView);
+                MQTTSharePreference.addOnlineDevice(getActivity(), deviceName);
             }
+            MQTTSharePreference.setLastOnlineTime(getActivity(), deviceName, System.currentTimeMillis());
         } else if (event.getWhat() == MqttEventBusConfig.deviceDisconnected) {
             String deviceName = event.getObj().toString();
             for (int i = 1; i < mDevicePanel.getChildCount(); i++) {
                 DeviceOperationView deviceOperationView = (DeviceOperationView)mDevicePanel.getChildAt(i);
                 if (deviceName.equals(deviceOperationView.getDeviceName())) {
                     mDevicePanel.removeViewAt(i);
+                    MQTTSharePreference.removeOnlineDevice(getActivity(), deviceName);
+                    MQTTSharePreference.setLastOnlineTime(getActivity(), deviceName, 0);
                     if (mDevicePanel.getChildCount() == 1) {
                         mDevicePanel.setVisibility(View.GONE);
                     }
@@ -285,11 +314,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         mShouldRunAnimation = false;
         if (mIsConnected) {
             mConnectTv.setText(getText(R.string.btn_txt_disconnect));
+            mStatusTransition.startTransition(mAnimationDuration);
         } else {
             mConnectTv.setText(getText(R.string.btn_txt_connect));
             mStatusTransition.reverseTransition(mAnimationDuration);
             mDevicePanel.setVisibility(View.GONE);
         }
+    }
+
+    public static boolean isConnected() {
+        return mIsConnected;
     }
 
     /**

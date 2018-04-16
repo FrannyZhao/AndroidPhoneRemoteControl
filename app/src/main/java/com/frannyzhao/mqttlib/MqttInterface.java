@@ -10,7 +10,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
  */
 
 public interface MqttInterface {
-    MqttClient connect(Activity activity, String broker, String userName, String password);
+    MqttClient connect(Context context, String broker, String userName, String password);
     void publish(String topic, String message);
     void disconnect();
     void subscribe(String topic);
