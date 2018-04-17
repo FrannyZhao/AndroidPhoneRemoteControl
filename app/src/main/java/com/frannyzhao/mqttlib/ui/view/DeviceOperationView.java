@@ -30,8 +30,8 @@ public class DeviceOperationView extends FrameLayout implements View.OnClickList
     private LinearLayout mOperationLl;
     private TextView mDeviceNameTv;
     private ImageView mExpandIv;
-    private TextView mOperationOpenFlash, mOperationCloseFlash,
-            mOperationOpenMusic, mOperationCloseMusic, mOperationVolumeMax, mOperationVolumeMin;
+    private TextView mOperationOpenFlash, mOperationCloseFlash, mOperationOpenMusic, mOperationCloseMusic,
+            mOperationVolumeMax, mOperationVolumeMin, mOperationStartLocation, mOperationStopLocation;
     private RelativeLayout mOperationSay;
     private EditText mSayWords;
     public DeviceOperationView(Context context) {
@@ -71,6 +71,10 @@ public class DeviceOperationView extends FrameLayout implements View.OnClickList
         mOperationVolumeMax.setOnClickListener(this);
         mOperationVolumeMin = findViewById(R.id.op_volume_min);
         mOperationVolumeMin.setOnClickListener(this);
+        mOperationStartLocation = findViewById(R.id.op_start_location);
+        mOperationStartLocation.setOnClickListener(this);
+        mOperationStopLocation = findViewById(R.id.op_stop_location);
+        mOperationStopLocation.setOnClickListener(this);
     }
 
     public void setDeviceName(String name) {
@@ -140,6 +144,18 @@ public class DeviceOperationView extends FrameLayout implements View.OnClickList
             mHashMap.clear();
             mHashMap.put(MessageHandler.KEY_TARGET_DEVICE, getDeviceName());
             String msg = MessageHandler.generateMessage(mContext, MessageHandler.ACTION_VOLUME_MIN,
+                    mHashMap);
+            MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
+        } else if (id == R.id.op_start_location) {
+            mHashMap.clear();
+            mHashMap.put(MessageHandler.KEY_TARGET_DEVICE, getDeviceName());
+            String msg = MessageHandler.generateMessage(mContext, MessageHandler.ACTION_START_LOCATION,
+                    mHashMap);
+            MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
+        } else if (id == R.id.op_stop_location) {
+            mHashMap.clear();
+            mHashMap.put(MessageHandler.KEY_TARGET_DEVICE, getDeviceName());
+            String msg = MessageHandler.generateMessage(mContext, MessageHandler.ACTION_STOP_LOCATION,
                     mHashMap);
             MqttHandler.getInstance().publish(MQTTSharePreference.getTopic(mContext), msg);
         }

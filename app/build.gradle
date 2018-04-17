@@ -18,6 +18,12 @@ android {
         }
     }
 
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             def appName = 'AndroidPhoneRemoteControl'
@@ -40,7 +46,7 @@ dependencies {
     compile 'com.android.support:support-v4:26.1.0'
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:design:26.1.0'
-    compile 'com.android.support.constraint:constraint-layout:1.1.0-beta5'
+    compile 'com.android.support.constraint:constraint-layout:1.1.0'
     compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
     compile 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
     compile 'org.greenrobot:eventbus:3.1.1'

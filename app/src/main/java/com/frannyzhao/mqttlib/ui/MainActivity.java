@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.baidu.mapapi.SDKInitializer;
 import com.frannyzhao.mqttlib.HeartbeatService;
 import com.frannyzhao.mqttlib.MyAccessibilityService;
 import com.frannyzhao.mqttlib.R;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_main);
         MainAdapter adapter = new MainAdapter(getSupportFragmentManager());
         mViewPager = findViewById(R.id.main_view_pager);
@@ -76,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         openAccessibility(MyAccessibilityService.class.getName(), this);
+
     }
 
     @Override

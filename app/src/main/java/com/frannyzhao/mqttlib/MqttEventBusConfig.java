@@ -13,5 +13,6 @@ public enum MqttEventBusConfig {
     messageArrived,
     deliveryComplete,
     deviceConnected,
-    deviceDisconnected
+    deviceDisconnected,
+    locationInfo
 }

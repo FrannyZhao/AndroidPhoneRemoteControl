@@ -16,8 +16,10 @@ import com.frannyzhao.mqttlib.BusEvent;
 import com.frannyzhao.mqttlib.MqttEventBusConfig;
 import com.frannyzhao.mqttlib.MqttHandler;
 import com.frannyzhao.mqttlib.MyAccessibilityService;
+import com.frannyzhao.mqttlib.entity.DeviceLocationInfo;
 import com.frannyzhao.mqttlib.entity.MyAccessibilityEvent;
 import com.frannyzhao.mqttlib.ui.HomeFragment;
+import com.frannyzhao.mqttlib.ui.MapActivity;
 import com.frannyzhao.mqttlib.utils.sp.MQTTSharePreference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -39,6 +41,8 @@ public class MessageHandler {
     public static final String RESULT_SUCCESS = "success";
     public static final String RESULT_FAIL = "fail";
     public static final String KEY_WORDS = "words";
+    public static final String KEY_LONGITUDE = "longitude";
+    public static final String KEY_LATITUDE = "latitude";
 
     public static final int ACTION_PING = 88;
     public static final int ACTION_PINGBACK = 89;
@@ -53,6 +57,9 @@ public class MessageHandler {
     public static final int ACTION_CLOSE_MUSIC = 107;
     public static final int ACTION_VOLUME_MAX = 108;
     public static final int ACTION_VOLUME_MIN = 109;
+    public static final int ACTION_START_LOCATION = 110;
+    public static final int ACTION_STOP_LOCATION = 111;
+    public static final int ACTION_LOCATION_INFO = 112;
 
     private static Camera mCamera = null;
     private static Camera.Parameters mCameraParameters;
@@ -77,7 +84,6 @@ public class MessageHandler {
         if (TextUtils.isEmpty(msg)) {
             return;
         }
-        MLog.d(TAG, "parseMessage ", msg);
         String message = MESSAGE_PREFIX + msg;
         Uri uri = Uri.parse(message);
         int action = NumberUtils.parseInt(uri.getQueryParameter(ACTION));
@@ -88,6 +94,7 @@ public class MessageHandler {
             case ACTION_PING:
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "get ping from ", targetDeviceName);
                     BusEvent deviceConnectedEvent = new BusEvent(MqttEventBusConfig.deviceConnected, fromDeviceName);
                     EventBus.getDefault().post(deviceConnectedEvent);
                     HashMap<String, String> hashMap = new HashMap<>();
@@ -101,6 +108,7 @@ public class MessageHandler {
             case ACTION_PINGBACK:
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "get pingback from ", targetDeviceName);
                     BusEvent deviceConnectedEvent = new BusEvent(MqttEventBusConfig.deviceConnected, fromDeviceName);
                     EventBus.getDefault().post(deviceConnectedEvent);
                 }
@@ -110,8 +118,14 @@ public class MessageHandler {
                 String actionResult = uri.getQueryParameter(KEY_RESULT);
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "action " + actionName + " " + actionResult);
                     Toast.makeText(activity, "action " + actionName + " " + actionResult,
                             Toast.LENGTH_SHORT).show();
+                    if (String.valueOf(ACTION_START_LOCATION).equals(actionName)) {
+                        Intent intent = new Intent(activity, MapActivity.class);
+                        intent.putExtra(MapActivity.KEY_DEVICE_NAME, fromDeviceName);
+                        activity.startActivity(intent);
+                    }
                 }
                 break;
             case ACTION_FIRST_ONLINE: // todo 加上通知支持控制的功能
@@ -141,7 +155,7 @@ public class MessageHandler {
             case ACTION_OPEN_FLASH:
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
-                    MLog.d(TAG, "Going to open flash");
+                    MLog.d(TAG, "Going to open flash on ", targetDeviceName);
                     try {
                         mCamera = Camera.open();
                         SurfaceTexture mDummy = new SurfaceTexture(1); // any int argument will do
@@ -160,7 +174,7 @@ public class MessageHandler {
             case ACTION_CLOSE_FLASH:
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
-                    MLog.d(TAG, "Going to close flash");
+                    MLog.d(TAG, "Going to close flash on ", targetDeviceName);
                     try {
                         mCameraParameters = mCamera.getParameters();
                         mCameraParameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
@@ -178,6 +192,7 @@ public class MessageHandler {
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 String words = uri.getQueryParameter(KEY_WORDS);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName) && !TextUtils.isEmpty(words)) {
+                    MLog.d(TAG, "say loudly on ", targetDeviceName);
                     VolumeHandler.turnVolumeUpToMax(activity);
                     HomeFragment.getSpeaker().speak(words, TextToSpeech.QUEUE_ADD, null);
 //                    VolumeHandler.restoreVolume(); todo 希望能检测到说完了之后把音量改回来
@@ -187,6 +202,7 @@ public class MessageHandler {
             case ACTION_OPEN_DOUBAN_FM:
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "open douban fm on ", targetDeviceName);
                     MyAccessibilityService.MyAccessibility_EVENT =
                             new MyAccessibilityEvent(MyAccessibilityEvent.TYPE_DOUBAN_FM, fromDeviceName);
                     Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -201,6 +217,7 @@ public class MessageHandler {
             case ACTION_CLOSE_MUSIC:
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "close music on ", targetDeviceName);
                     if (am != null) {
                         // Request audio focus for playback focusChangeListener
                         int result = am.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
@@ -218,6 +235,7 @@ public class MessageHandler {
             case ACTION_VOLUME_MAX:
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "volume max on ", targetDeviceName);
                     VolumeHandler.turnVolumeUpToMax(activity);
                     sendActionResult(activity, action, RESULT_SUCCESS, fromDeviceName);
                 }
@@ -225,8 +243,40 @@ public class MessageHandler {
             case ACTION_VOLUME_MIN:
                 targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
                 if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "volume min on ", targetDeviceName);
                     VolumeHandler.turnVolumeDownToMin(activity);
                     sendActionResult(activity, action, RESULT_SUCCESS, fromDeviceName);
+                }
+                break;
+            case ACTION_START_LOCATION:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "start location on ", targetDeviceName);
+                    MyLocation.getInstance(activity).setTargetDevice(fromDeviceName);
+                    MyLocation.getInstance(activity).startLocation();
+                    sendActionResult(activity, action, RESULT_SUCCESS, fromDeviceName);
+                }
+                break;
+            case ACTION_STOP_LOCATION:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "stop location on ", targetDeviceName);
+                    MyLocation.getInstance(activity).stopLocation();
+                    sendActionResult(activity, action, RESULT_SUCCESS, fromDeviceName);
+                }
+                break;
+            case ACTION_LOCATION_INFO:
+                targetDeviceName = uri.getQueryParameter(KEY_TARGET_DEVICE);
+                if (MQTTSharePreference.getDeviceName(activity).equals(targetDeviceName)) {
+                    MLog.d(TAG, "get location info from ", fromDeviceName);
+                    String longitude = uri.getQueryParameter(KEY_LONGITUDE);
+                    String latitude = uri.getQueryParameter(KEY_LATITUDE);
+                    DeviceLocationInfo deviceLocationInfo = new DeviceLocationInfo();
+                    deviceLocationInfo.setDevice(fromDeviceName);
+                    deviceLocationInfo.setLongitude(NumberUtils.parseFloat(longitude));
+                    deviceLocationInfo.setLatitude(NumberUtils.parseFloat(latitude));
+                    BusEvent locationInfo = new BusEvent(MqttEventBusConfig.locationInfo, deviceLocationInfo);
+                    EventBus.getDefault().post(locationInfo);
                 }
                 break;
             default:

@@ -1,16 +1,11 @@
 package com.frannyzhao.mqttlib.ui;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.speech.tts.TextToSpeech;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,14 +22,14 @@ import com.frannyzhao.mqttlib.jobqueue.JobManager;
 import com.frannyzhao.mqttlib.ui.view.DeviceOperationView;
 import com.frannyzhao.mqttlib.utils.MLog;
 import com.frannyzhao.mqttlib.utils.MessageHandler;
+import com.frannyzhao.mqttlib.utils.MyLocation;
+import com.frannyzhao.mqttlib.utils.PermissionUtils;
 import com.frannyzhao.mqttlib.utils.sp.MQTTSharePreference;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.IOException;
 import java.util.Locale;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
@@ -48,7 +43,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private LinearLayout mDevicePanel;
 
     private static TextToSpeech mTts;
-    private static final int CAMERA_REQUEST_CODE = 1;
+    private PermissionUtils mPermissionUtils;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -71,32 +66,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         MLog.d(TAG, "onResume");
         super.onResume();
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            // 为了打开闪光灯, 申请相机权限
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA},
-                    CAMERA_REQUEST_CODE);
-        }
+        mPermissionUtils = new PermissionUtils(getActivity());
         enableTTS();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case CAMERA_REQUEST_CODE:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the contacts-related task you need to do.
-                    // TODO 支持相机功能
-                } else {
-                    // permission denied, boo! Disable the functionality that depends on this permission.
-                    // todo 不支持相机功能
-                }
-                break;
-            default:
-                break;
-        }
+        mPermissionUtils.handlePermissionResult(requestCode, permissions, grantResults);
     }
 
     public static TextToSpeech getSpeaker() {
@@ -138,6 +114,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroy() {
         MLog.d(TAG, "onDestroy");
+        MyLocation.getInstance(getActivity()).stopLocation();
         if (mIsConnected) {
             String msg = MessageHandler.generateMessage(getActivity(),
                     MessageHandler.ACTION_DISCONNECT, null);

@@ -24,7 +24,7 @@ import java.util.Set;
 public class HeartbeatService extends Service {
     private static final String TAG = HeartbeatService.class.getSimpleName();
     private boolean mIsRunning;
-    private static final int INTERVAL = 10000;
+    private static final int INTERVAL = 30000;
     private static final int MAX_FAIL_COUNT = 3;
     private int tryConnectCount = 0;
 
@@ -83,7 +83,6 @@ public class HeartbeatService extends Service {
                                                 HeartbeatService.this),
                                         MQTTSharePreference.getLoginName(HeartbeatService.this),
                                         MQTTSharePreference.getPassword(HeartbeatService.this));
-
                             }
                         }
                     }
